@@ -1,0 +1,58 @@
+---
+
+- name: Ensure tandoor paths exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+    owner: 0
+    group: 0
+  with_items:
+    - "{{ tandoor_base_path }}"
+    - "{{ tandoor_data_path }}"
+    - "{{ tandoor_staticfiles_path }}"
+    - "{{ tandoor_nginx_path }}"
+    - "{{ tandoor_mediafiles_path }}"
+
+- name: Ensure tandoor support files installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "{{ tandoor_base_path }}/{{ item }}"
+    mode: 0640
+    owner: "{{ tandoor_uid }}"
+    group: "{{ tandoor_gid }}"
+  with_items:
+    - env
+    - labels-api
+    - labels-frontend
+
+- name: Ensure tandoor nginx config installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/recipes.conf.j2"
+    dest: "{{ tandoor_nginx_path }}/recipes.conf"
+    mode: 0640
+    owner: 0
+    group: 0
+
+
+- name: Ensure tandoor container image is pulled
+  community.docker.docker_image:
+    name: "{{ item.image }}"
+    source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
+  with_items:
+    - {image: "{{ tandoor_api_container_image }}"}
+    - {image: "{{ tandoor_frontend_container_image }}"}
+
+- name: Ensure tandoor container network is created
+  community.general.docker_network:
+    name: "{{ tandoor_container_network }}"
+    driver: bridge
+
+- name: Ensure tandoor systemd service is present
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0644
+  with_items:
+    - {src: "{{ role_path }}/templates/systemd/tandoor-api.service.j2", dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_api_identifier }}.service"}
+    - {src: "{{ role_path }}/templates/systemd/tandoor-frontend.service.j2", dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_frontend_identifier }}.service"}

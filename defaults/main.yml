@@ -1,0 +1,215 @@
+---
+
+# Project source code URL: https://github.com/TandoorRecipes/recipes
+
+tandoor_enabled: true
+
+tandoor_identifier: tandoor
+tandoor_api_identifier: "{{ tandoor_identifier }}-api"
+tandoor_frontend_identifier: "{{ tandoor_identifier }}-frontend"
+
+tandoor_scheme: https
+
+# The fully-qualified name of your tandoor server (e.g. `tandoor.example.com`)
+tandoor_hostname: ''
+
+tandoor_path_prefix: /
+
+tandoor_api_version: 1.5.14
+tandoor_frontend_version: "1.25.4-alpine"
+# latest: frontend_version: "mainline-alpine"
+
+tandoor_uid: ''
+tandoor_gid: ''
+
+tandoor_systemd_required_services_list: "{{ tandoor_systemd_required_services_list_default + tandoor_systemd_required_services_list_auto + tandoor_systemd_required_services_list_custom }}"
+tandoor_systemd_required_services_list_default: ['docker.service']
+tandoor_systemd_required_services_list_auto: []
+tandoor_systemd_required_services_list_custom: []
+
+tandoor_systemd_wanted_services_list: "{{ tandoor_systemd_wanted_services_list_default + tandoor_systemd_wanted_services_list_auto + tandoor_systemd_wanted_services_list_custom }}"
+tandoor_systemd_wanted_services_list_default: []
+tandoor_systemd_wanted_services_list_auto: []
+tandoor_systemd_wanted_services_list_custom: []
+
+tandoor_base_path: "/{{ tandoor_base_path }}/tandoor"
+tandoor_data_path: "{{tandoor_base_path}}/data"
+tandoor_staticfiles_path: "{{ tandoor_data_path }}/staticfiles"
+tandoor_nginx_path: "{{ tandoor_data_path }}/nginx"
+tandoor_mediafiles_path: "{{ tandoor_data_path }}/mediafiles"
+
+tandoor_api_container_image: "{{ tandoor_api_container_image_registry_prefix }}vabene1111/recipes:{{ tandoor_api_container_image_tag }}"
+tandoor_api_container_image_tag: "{{ tandoor_api_version }}"
+tandoor_api_container_image_force_pull: "{{ tandoor_api_container_image.endswith(':latest') }}"
+tandoor_api_container_image_registry_prefix: docker.io/
+# A list of extra arguments to pass to the api container
+tandoor_api_container_extra_arguments: []
+
+# tandoor frontend
+tandoor_frontend_container_image: "{{ tandoor_frontend_container_image_registry_prefix }}nginx:{{ tandoor_frontend_container_image_tag }}"
+tandoor_frontend_container_image_tag: "{{ tandoor_frontend_version }}"
+tandoor_frontend_container_image_force_pull: "{{ tandoor_frontend_container_image.endswith(':latest') or tandoor_frontend_container_image.endswith('mainline-alpine') }}"
+tandoor_frontend_container_image_registry_prefix: docker.io/
+# A list of extra arguments to pass to the frontend container
+tandoor_frontend_container_extra_arguments: []
+
+tandoor_api_container_http_host_bind_port: ''
+tandoor_frontend_container_http_host_bind_port: ''
+
+# tandoor_frontend_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
+# See `../templates/labels.j2` for details.
+#
+# To inject your own other container labels, see `tandoor_api_container/frontend_labels_additional_labels`.
+tandoor_frontend_container_labels_traefik_enabled: true
+tandoor_frontend_container_labels_traefik_docker_network: ''
+tandoor_frontend_container_labels_traefik_hostname: "{{ tandoor_hostname }}"
+# The path prefix must either be `/` or not end with a slash (e.g. `/tandoor`).
+tandoor_frontend_container_labels_traefik_path_prefix: "{{ tandoor_path_prefix }}"
+# Controls whether `/.well-known/{carddav,caldav}` will be redirected to `/remote.php/dav/`
+tandoor_frontend_container_labels_traefik_rule: "Host(`{{ tandoor_frontend_container_labels_traefik_hostname }}`){% if tandoor_frontend_container_labels_traefik_path_prefix != '/' %} && PathPrefix(`{{ tandoor_frontend_container_labels_traefik_path_prefix | quote }}`){% endif %}"
+tandoor_frontend_container_labels_traefik_priority: 0
+tandoor_frontend_container_labels_traefik_entrypoints: web-secure
+tandoor_frontend_container_labels_traefik_tls: "{{ tandoor_frontend_container_labels_traefik_entrypoints != 'web' }}"
+tandoor_frontend_container_labels_traefik_tls_certResolver: default  # noqa var-naming
+
+# Controls which additional headers to attach to all HTTP requests.
+# To add your own custom request headers, use `tandoor_frontend_container_labels_traefik_additional_response_headers_custom`
+tandoor_frontend_container_labels_traefik_additional_request_headers: "{{ tandoor_frontend_container_labels_traefik_additional_request_headers_auto | combine(tandoor_frontend_container_labels_traefik_additional_request_headers_custom) }}"
+tandoor_frontend_container_labels_traefik_additional_request_headers_auto: {}
+tandoor_frontend_container_labels_traefik_additional_request_headers_custom: {}
+
+# Controls which additional headers to attach to all HTTP responses.
+# To add your own custom response headers, use `tandoor_frontend_container_labels_traefik_additional_response_headers_custom`
+tandoor_frontend_container_labels_traefik_additional_response_headers: "{{ tandoor_frontend_container_labels_traefik_additional_response_headers_auto | combine(tandoor_frontend_container_labels_traefik_additional_response_headers_custom) }}"
+tandoor_frontend_container_labels_traefik_additional_response_headers_auto: |
+  {{
+    {}
+    | combine ({'X-XSS-Protection': tandoor_http_header_xss_protection} if tandoor_http_header_xss_protection else {})
+    | combine ({'X-Frame-Options': tandoor_http_header_frame_options} if tandoor_http_header_frame_options else {})
+    | combine ({'X-Content-Type-Options': tandoor_http_header_content_type_options} if tandoor_http_header_content_type_options else {})
+    | combine ({'Content-Security-Policy': tandoor_http_header_content_security_policy} if tandoor_http_header_content_security_policy else {})
+    | combine ({'Permission-Policy': tandoor_http_header_content_permission_policy} if tandoor_http_header_content_permission_policy else {})
+    | combine ({'Strict-Transport-Security': tandoor_http_header_strict_transport_security} if tandoor_http_header_strict_transport_security and tandoor_frontend_container_labels_traefik_tls else {})
+  }}
+tandoor_frontend_container_labels_traefik_additional_response_headers_custom: {}
+
+# A list of middlewares to add to the service.
+# Add your own via the `tandoor_frontend_container_labels_traefik_http_middlewares_custom` variable.
+tandoor_frontend_container_labels_traefik_http_middlewares: "{{ tandoor_frontend_container_labels_traefik_http_middlewares_default + tandoor_frontend_container_labels_traefik_http_middlewares_auto + tandoor_frontend_container_labels_traefik_http_middlewares_custom }}"
+
+tandoor_frontend_container_labels_traefik_http_middlewares_default: {}
+tandoor_frontend_container_labels_traefik_http_middlewares_auto: []
+tandoor_frontend_container_labels_traefik_http_middlewares_custom: []
+
+# tandoor_api_container/frontend_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
+# See `../templates/labels.j2` for details.
+#
+# Example:
+# tandoor_api_container/frontend_labels_additional_labels: |
+#   my.label=1
+#   another.label="here"
+tandoor_api_container_labels_additional_labels: ''
+tandoor_frontend_container_labels_additional_labels: ''
+# tandoor_container_additional_environment_variables contains a multiline string with additional environment variables to pass to the container.
+#
+# Example:
+# tandoor_container_additional_environment_variables: |
+#   VAR=1
+#   ANOTHER=value
+tandoor_container_additional_environment_variables: ''
+
+# A list of additional "mounts" to be mounted in the container.
+# Contains definition objects like this:
+# tandoor_container_additional_mounts:
+# - "type=bind|volume|tmpfs,source=/outside,target=/inside,readonly,bind-propagation=slave"
+tandoor_container_additional_mounts: []
+
+tandoor_container_network: "{{ tandoor_identifier }}"
+
+# A list of additional container networks that the container would be connected to.
+# The playbook does not create these networks, so make sure they already exist.
+tandoor_api_container_additional_networks: "{{ tandoor_api_container_additional_networks_auto + tandoor_api_container_additional_networks_custom }}"
+tandoor_api_container_additional_networks_auto: []
+tandoor_api_container_additional_networks_custom: []
+
+tandoor_frontend_container_additional_networks: "{{ tandoor_frontend_container_additional_networks_auto + tandoor_frontend_container_additional_networks_custom }}"
+tandoor_frontend_container_additional_networks_auto: []
+tandoor_frontend_container_additional_networks_custom: []
+
+tandoor_database_type: postgres
+tandoor_database_hostname: ''
+tandoor_database_port: 5432
+tandoor_database_name: tandoor
+tandoor_database_username: ''
+tandoor_database_password: ''
+
+# A list of mail configuration parameters for tandoor.
+tandoor_config_parameter_mail_smtphost: ''
+tandoor_config_parameter_mail_smtpport: ''
+tandoor_config_parameter_mail_smtpsecure: ''
+tandoor_config_parameter_mail_smtpauth: false
+tandoor_config_parameter_mail_smtpname: ''
+tandoor_config_parameter_mail_smtppassword: ''
+tandoor_config_parameter_mail_from_address: '' # localpart
+tandoor_config_parameter_mail_domain: '' # domain
+# Controls the tandoor environment secret variable
+tandoor_environment_variable_secret: ''
+# Controls the tandoor environment debug variable
+tandoor_environment_variable_debug: 0
+# The PDF Exporter is an experimental feature that uses the puppeteer browser renderer to render each recipe and export it to PDF.
+# For that to work it downloads a chromium binary of about 140 MB to your server and then renders the PDF files using that.
+# Since that is something some server administrators might not want there the PDF exporter is disabled by default
+tandoor_environment_variable_enable_pdf_export: 0
+tandoor_environment_variable_tandoor_port: 8080
+# Specifies the value of the `X-XSS-Protection` header
+# Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
+#
+# Learn more about it is here:
+# - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
+# - https://portswigger.net/web-security/cross-site-scripting/reflected
+tandoor_http_header_xss_protection: "1; mode=block"
+
+# Specifies the value of the `X-Frame-Options` header which controls whether framing can happen.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
+tandoor_http_header_frame_options: SAMEORIGIN
+
+# Specifies the value of the `X-Content-Type-Options` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+tandoor_http_header_content_type_options: nosniff
+
+# Specifies the value of the `Content-Security-Policy` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+tandoor_http_header_content_security_policy: frame-ancestors 'self'
+
+# Specifies the value of the `Permission-Policy` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permission-Policy
+tandoor_http_header_content_permission_policy: "{{ 'interest-cohort=()' if tandoor_floc_optout_enabled else '' }}"
+
+# Specifies the value of the `Strict-Transport-Security` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+tandoor_http_header_strict_transport_security: "max-age=31536000; includeSubDomains{{ '; preload' if tandoor_hsts_preload_enabled else '' }}"
+
+# Controls whether to send a "Permissions-Policy interest-cohort=();" header along with all responses
+#
+# Learn more about what it is here:
+# - https://www.eff.org/deeplinks/2021/03/googles-floc-terrible-idea
+# - https://paramdeo.com/blog/opting-your-website-out-of-googles-floc-network
+# - https://amifloced.org/
+#
+# Of course, a better solution is to just stop using browsers (like Chrome), which participate in such tracking practices.
+# See: `tandoor_content_permission_policy`
+tandoor_floc_optout_enabled: true
+
+# Controls if HSTS preloading is enabled
+#
+# In its strongest and recommended form, the [HSTS policy](https://www.chromium.org/hsts) includes all subdomains, and
+# indicates a willingness to be "preloaded" into browsers:
+# `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
+# For more information visit:
+# - https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security
+# - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+# - https://hstspreload.org/#opt-in
+# See: `tandoor_http_header_strict_transport_security`
+tandoor_hsts_preload_enabled: false
+
+

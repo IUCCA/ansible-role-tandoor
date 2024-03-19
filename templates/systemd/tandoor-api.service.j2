@@ -1,0 +1,46 @@
+[Unit]
+Description=tandoor API ({{ tandoor_api_identifier }})
+{% for service in tandoor_systemd_required_services_list %}
+Requires={{ service }}
+After={{ service }}
+{% endfor %}
+DefaultDependencies=no
+
+[Service]
+Type=simple
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} stop --time={{ devture_systemd_docker_base_container_stop_grace_time_seconds }} {{ tandoor_api_identifier }} 2>/dev/null || true'
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ tandoor_api_identifier }} 2>/dev/null || true'
+
+ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
+                --rm \
+                --name={{ tandoor_api_identifier }} \
+                --log-driver=none \
+                --cap-drop=ALL \
+                {% if tandoor_api_container_http_host_bind_port %}
+                -p {{ tandoor_api_container_http_host_bind_port }}:{{ tandoor_api_container_http_port }} \
+                {% endif %}
+                --label-file={{ tandoor_base_path }}/labels-api \
+                --network={{ tandoor_container_network }} \
+                --mount type=bind,src={{ tandoor_staticfiles_path }},dst=/opt/recipes/staticfiles \
+                --mount type=bind,src={{ tandoor_nginx_path }},dst=/opt/recipes/nginx/conf.d \
+                --mount type=bind,src={{ tandoor_mediafiles_path }},dst=/opt/recipes/mediafiles  \
+                --env-file={{ tandoor_base_path }}/env \
+                {% if tandoor_api_container_extra_arguments | length > 0 %}
+                {{ tandoor_api_container_extra_arguments | join(' ') }} \
+                {% endif %}
+                {{ tandoor_api_container_image }}
+
+{% for network in tandoor_api_container_additional_networks %}
+ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ tandoor_api_identifier }}
+{% endfor %}
+
+ExecStart={{ devture_systemd_docker_base_host_command_docker }} start --attach {{ tandoor_api_identifier }}
+
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} stop --time={{ devture_systemd_docker_base_container_stop_grace_time_seconds }} {{ tandoor_api_identifier }} 2>/dev/null || true'
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ tandoor_api_identifier }} 2>/dev/null || true'
+Restart=always
+RestartSec=30
+SyslogIdentifier={{ tandoor_api_identifier }}
+
+[Install]
+WantedBy=multi-user.target
