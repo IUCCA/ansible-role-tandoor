@@ -25,10 +25,10 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
                 --mount type=bind,src={{ tandoor_nginx_path }},dst=/etc/nginx/conf.d,ro \
                 --mount type=bind,src={{ tandoor_mediafiles_path }},dst=/media,ro \
                 --cap-drop=ALL \
-			    --cap-add=NET_BIND_SERVICE \
-		    	--cap-add=SETGID \
-		    	--cap-add=SETUID \
-		    	--cap-add=CHOWN \
+                --cap-add=NET_BIND_SERVICE \
+                --cap-add=SETGID \
+                --cap-add=SETUID \
+                --cap-add=CHOWN \
                 --env-file={{ tandoor_base_path }}/env \
                 {% if tandoor_frontend_container_extra_arguments | length > 0 %}
                 {{ tandoor_frontend_container_extra_arguments | join(' ') }} \
