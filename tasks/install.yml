@@ -1,5 +1,4 @@
 ---
-
 - name: Ensure tandoor paths exist
   ansible.builtin.file:
     path: "{{ item }}"
@@ -10,8 +9,17 @@
   with_items:
     - "{{ tandoor_base_path }}"
     - "{{ tandoor_data_path }}"
-    - "{{ tandoor_staticfiles_path }}"
     - "{{ tandoor_nginx_path }}"
+
+- name: Ensure tandoor data subdir paths with 755 exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+    owner: 0
+    group: 0
+  with_items:
+    - "{{ tandoor_staticfiles_path }}"
     - "{{ tandoor_mediafiles_path }}"
 
 - name: Ensure tandoor support files installed

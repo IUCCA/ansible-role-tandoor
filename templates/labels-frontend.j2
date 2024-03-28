@@ -7,17 +7,6 @@ traefik.docker.network={{ tandoor_frontend_container_labels_traefik_docker_netwo
 
 {% set middlewares = [] %}
 
-{% if tandoor_frontend_container_labels_traefik_path_prefix != '/' %}
-traefik.http.middlewares.{{ tandoor_identifier }}-slashless-redirect.redirectregex.regex=^({{ tandoor_frontend_container_labels_traefik_path_prefix | quote }})$
-traefik.http.middlewares.{{ tandoor_identifier }}-slashless-redirect.redirectregex.replacement=${1}/
-{% set middlewares = middlewares + [tandoor_identifier + '-slashless-redirect'] %}
-{% endif %}
-
-{#
-	Intentionally not adding a stripPrefix middleware.
-	tandoor seems to serve itself under the same prefix it sees in the BASEURL environment variable.
-#}
-
 {% if tandoor_frontend_container_labels_traefik_additional_request_headers.keys() | length > 0 %}
 {% for name, value in tandoor_frontend_container_labels_traefik_additional_request_headers.items() %}
 traefik.http.middlewares.{{ tandoor_identifier }}-add-request-headers.headers.customrequestheaders.{{ name }}={{ value }}

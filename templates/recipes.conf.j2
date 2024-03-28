@@ -1,3 +1,5 @@
+# Based on https://github.com/TandoorRecipes/recipes/blob/94045905d3ee2c1a5f12d44fe44594a1226ccf9c/nginx/conf.d/Recipes.conf
+# Mixed with some issue reports and additional input from a few issues
 server {
   listen 80;
   server_name localhost;
@@ -5,12 +7,20 @@ server {
   client_max_body_size 128M;
 
   # serve media files
-  location /media/ {
+  location {{ tandoor_path_prefix | regex_replace('/$', '') if tandoor_path_prefix is defined and tandoor_path_prefix != '/' else '' }}/media/ {
     alias /media/;
   }
+  # serve static files
+  location {{ tandoor_path_prefix | regex_replace('/$', '') if tandoor_path_prefix is defined and tandoor_path_prefix != '/' else '' }}/static/ {
+    alias /static/;
+  }
   # pass requests for dynamic content to gunicorn
-  location / {
+  location {{ tandoor_path_prefix | regex_replace('/$', '') if tandoor_path_prefix is defined and tandoor_path_prefix != '/' else '' }}/ {
     proxy_set_header Host $http_host;
     proxy_pass http://{{tandoor_api_identifier}}:{{tandoor_environment_variable_tandoor_port}};
+{% if tandoor_path_prefix and tandoor_path_prefix != '/' %}
+    proxy_set_header X-Script-Name {{ tandoor_path_prefix | regex_replace('/$', '') }};
+    proxy_cookie_path / {{ tandoor_path_prefix | regex_replace('/$', '') }};
+{% endif %}
   }
 }

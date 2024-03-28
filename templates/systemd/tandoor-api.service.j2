@@ -22,7 +22,8 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
                 --label-file={{ tandoor_base_path }}/labels-api \
                 --network={{ tandoor_container_network }} \
                 --mount type=bind,src={{ tandoor_staticfiles_path }},dst=/opt/recipes/staticfiles \
-                --mount type=bind,src={{ tandoor_nginx_path }},dst=/opt/recipes/nginx/conf.d \
+# Managed by Playbook instead of tandoor-api
+#               --mount type=bind,src={{ tandoor_nginx_path }},dst=/opt/recipes/nginx/conf.d \
                 --mount type=bind,src={{ tandoor_mediafiles_path }},dst=/opt/recipes/mediafiles  \
                 --env-file={{ tandoor_base_path }}/env \
                 {% if tandoor_api_container_extra_arguments | length > 0 %}
