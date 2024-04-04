@@ -2,6 +2,8 @@
 
 This is an [Ansible](https://www.ansible.com/) role which installs [Tandoor](https://docs.tandoor.dev/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
+[Tandoor Container Tags](https://hub.docker.com/r/vabene1111/recipes/tags)
+
 This role *implicitly* depends on:
 
 - [`com.devture.ansible.role.playbook_help`](https://github.com/devture/com.devture.ansible.role.playbook_help)
