@@ -144,14 +144,15 @@ tandoor_database_username: ''
 tandoor_database_password: ''
 
 # A list of mail configuration parameters for tandoor.
-tandoor_config_parameter_mail_smtphost: ''
-tandoor_config_parameter_mail_smtpport: ''
-tandoor_config_parameter_mail_smtpsecure: ''
-tandoor_config_parameter_mail_smtpauth: false
-tandoor_config_parameter_mail_smtpname: ''
-tandoor_config_parameter_mail_smtppassword: ''
-tandoor_config_parameter_mail_from_address: '' # localpart
-tandoor_config_parameter_mail_domain: '' # domain
+tandoor_email_host: ''
+tandoor_email_port: ''
+tandoor_host_user: ''
+tandoor_host_password: ''
+tandoor_use_tls: '0'
+tandoor_use_ssl: '0'
+tandoor_default_from_email: '' # email sender address (default 'webmaster@localhost')
+tondor_account_email_subject_prefix: '' # prefix used for account related emails (default "[Tandoor Recipes] ")
+
 # Controls the tandoor environment secret variable
 tandoor_environment_variable_secret: ''
 # Controls the tandoor environment debug variable
