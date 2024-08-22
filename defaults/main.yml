@@ -15,8 +15,8 @@ tandoor_hostname: ''
 
 tandoor_path_prefix: /
 
-tandoor_api_version: 1.5.17
-tandoor_frontend_version: "1.25.4-alpine"
+tandoor_api_version: 1.5.19
+tandoor_frontend_version: "1.27-alpine"
 # latest: frontend_version: "mainline-alpine"
 
 tandoor_uid: ''
