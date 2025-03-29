@@ -15,7 +15,7 @@ tandoor_hostname: ''
 
 tandoor_path_prefix: /
 
-tandoor_api_version: 1.5.31
+tandoor_api_version: 1.5.34
 #tandoor_frontend: nginx
 tandoor_frontend_version: "1.27-alpine"
 # latest: frontend_version: "mainline-alpine"
