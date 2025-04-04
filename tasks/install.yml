@@ -42,7 +42,6 @@
     owner: 0
     group: 0
 
-
 - name: Ensure tandoor container image is pulled
   community.docker.docker_image:
     name: "{{ item.image }}"
@@ -51,24 +50,30 @@
     - {image: "{{ tandoor_api_container_image }}"}
     - {image: "{{ tandoor_frontend_container_image }}"}
 
-
-
-
-
-- name: Ensure tandoor container image is pulled via community.docker.docker_image
+- name: Ensure tandoor api container image is pulled via community.docker.docker_image
   when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
   community.docker.docker_image:
-    name: "{{ item.image }}"
+    name: "{{ tandoor_api_container_image }}"
     source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
-    force_source: "{{ tandoor_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
-    force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else tandoor_container_image_force_pull }}"
+    force_source: "{{ tandoor_api_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
+    force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else tandoor_api_container_image_force_pull }}"
   register: image_pull_result
   retries: "{{ devture_playbook_help_container_retries_count }}"
   delay: "{{ devture_playbook_help_container_retries_delay }}"
   until: image_pull_result is not failed
-  with_items:
-    - {image: "{{ tandoor_api_container_image }}"}
-    - {image: "{{ tandoor_frontend_container_image }}"}
+    # - {image: "{{ tandoor_frontend_container_image }}"}
+
+- name: Ensure tandoor frontend container image is pulled via community.docker.docker_image
+  when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
+  community.docker.docker_image:
+    name: "{{ tandoor_frontend_container_image }}"
+    source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
+    force_source: "{{ tandoor_frontend_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
+    force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else tandoor_frontend_container_image_force_pull }}"
+  register: image_pull_result
+  retries: "{{ devture_playbook_help_container_retries_count }}"
+  delay: "{{ devture_playbook_help_container_retries_delay }}"
+  until: image_pull_result is not failed
 
 - name: Ensure tandoor container image is pulled via command
   when: devture_systemd_docker_base_container_image_pull_method == 'command'
