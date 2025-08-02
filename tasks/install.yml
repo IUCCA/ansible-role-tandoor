@@ -10,15 +10,6 @@
     - "{{ tandoor_base_path }}"
     - "{{ tandoor_data_path }}"
 
-- name: Delete unnecessary files from old version
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
-    - "{{ tandoor_nginx_path }}"
-    - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_api_identifier }}.service"
-    - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_frontend_identifier }}.service"
-
 - name: Ensure tandoor data subdir paths with 755 exist
   ansible.builtin.file:
     path: "{{ item }}"
@@ -90,3 +81,14 @@
     mode: 0644
   with_items:
     - {src: "{{ role_path }}/templates/systemd/tandoor.service.j2", dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier }}.service"}
+
+- name: Delete unnecessary files from old version
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ tandoor_nginx_path }}"
+    - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_api_identifier }}.service"
+    - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_frontend_identifier }}.service"
+    - "{{ tandoor_base_path }}/labels-api"
+    - "{{ tandoor_base_path }}/labels-frontend"
