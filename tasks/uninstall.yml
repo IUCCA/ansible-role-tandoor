@@ -14,8 +14,8 @@
         enabled: false
         daemon_reload: true
       with_items:
-        - "{{ tandoor_identifier_api }}.service"
-        - "{{ tandoor_identifier_frontend }}.service"
+        - "{{ tandoor_api_identifier }}.service"
+        - "{{ tandoor_frontend_identifier_frontend }}.service"
         - "{{ tandoor_identifier }}.service"
 
     - name: Ensure tandoor systemd service does not exist
@@ -23,8 +23,8 @@
         path: "{{ item }}"
         state: absent
       with_items:
-        - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier_api }}.service"
-        - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier_frontend }}.service"
+        - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_api_identifier_ }}.service"
+        - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_frontend_identifier }}.service"
         - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier }}.service"
 
     - name: Ensure tandoor path doesn't exist

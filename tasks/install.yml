@@ -89,8 +89,8 @@
     enabled: false
     daemon_reload: true
   with_items:
-    - "{{ tandoor_identifier_api }}.service"
-    - "{{ tandoor_identifier_frontend }}.service"
+    - "{{ tandoor_api_identifier }}.service"
+    - "{{ tandoor_frontend_identifier }}.service"
 
 - name: Delete unnecessary files from old version
   ansible.builtin.file:
