@@ -91,6 +91,7 @@
   with_items:
     - "{{ tandoor_api_identifier }}.service"
     - "{{ tandoor_frontend_identifier }}.service"
+  ignore_errors: true
 
 - name: Delete unnecessary files from old version
   ansible.builtin.file:
