@@ -82,16 +82,22 @@
   with_items:
     - {src: "{{ role_path }}/templates/systemd/tandoor.service.j2", dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier }}.service"}
 
-- name: Ensure old tandoor systemd service is stopped
+- name: Prüfe, ob systemd service files existieren
+  ansible.builtin.stat:
+    path: "{{ devture_systemd_docker_base_systemd_path }}/{{ item }}.service"
+  loop:
+    - "{{ tandoor_api_identifier }}"
+    - "{{ tandoor_frontend_identifier }}"
+  register: service_files
+
+- name: Stoppe nur Dienste mit existierenden service files
   ansible.builtin.service:
-    name: "{{ item }}"
+    name: "{{ item.item }}.service"
     state: stopped
     enabled: false
     daemon_reload: true
-  with_items:
-    - "{{ tandoor_api_identifier }}.service"
-    - "{{ tandoor_frontend_identifier }}.service"
-  ignore_errors: true
+  loop: "{{ service_files.results }}"
+  when: item.stat.exists
 
 - name: Delete unnecessary files from old version
   ansible.builtin.file:
