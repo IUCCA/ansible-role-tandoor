@@ -12,7 +12,7 @@
 
 - name: Delete unnecessary files from old version
   ansible.builtin.file:
-    path: "{{ item }}"
+    name: "{{ item }}"
     state: absend
     with_items:
       - "{{ tandoor_nginx_path }}"
