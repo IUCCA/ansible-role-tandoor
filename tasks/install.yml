@@ -12,13 +12,12 @@
 
 - name: Delete unnecessary files from old version
   ansible.builtin.file:
-    name: "{{ item }}"
+    path: "{{ item }}"
     state: absend
-    with_items:
-      - "{{ tandoor_nginx_path }}"
-      - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_api_identifier }}.service"
-      - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_frontend_identifier }}.service"
-
+  with_items:
+    - "{{ tandoor_nginx_path }}"
+    - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_api_identifier }}.service"
+    - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_frontend_identifier }}.service"
 
 - name: Ensure tandoor data subdir paths with 755 exist
   ansible.builtin.file:
@@ -41,7 +40,6 @@
   with_items:
     - env
     - labels
-
 
 - name: Ensure tandoor container image is pulled via community.docker.docker_image
   when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
