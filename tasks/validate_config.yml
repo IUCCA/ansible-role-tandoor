@@ -34,7 +34,7 @@
       when: "tandoor_container_labels_traefik_path_prefix != '/' and tandoor_container_labels_traefik_path_prefix[-1] == '/'"
 
     - name: Fail if tandoor_container_labels_traefik_path_prefix is not empty
-      ansible.builtin.debug:
+      ansible.builtin.fail:
         msg: "tandoor_container_labels_traefik_path_prefix is not empty"
       when: tandoor_container_labels_traefik_path_prefix != ""
         
