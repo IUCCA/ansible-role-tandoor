@@ -5,6 +5,7 @@
 tandoor_enabled: true
 
 tandoor_identifier: tandoor
+# Leftover from version 1.x, only used to delete old files
 tandoor_api_identifier: "{{ tandoor_identifier }}-api"
 tandoor_frontend_identifier: "{{ tandoor_identifier }}-frontend"
 
@@ -15,10 +16,7 @@ tandoor_hostname: ''
 
 tandoor_path_prefix: /
 
-tandoor_api_version: 1.5.34
-#tandoor_frontend: nginx
-tandoor_frontend_version: "1.27-alpine"
-# latest: frontend_version: "mainline-alpine"
+tandoor_version: 2.0.1
 
 tandoor_uid: ''
 tandoor_gid: ''
@@ -39,50 +37,42 @@ tandoor_staticfiles_path: "{{ tandoor_data_path }}/staticfiles"
 tandoor_nginx_path: "{{ tandoor_data_path }}/nginx"
 tandoor_mediafiles_path: "{{ tandoor_data_path }}/mediafiles"
 
-tandoor_api_container_image: "{{ tandoor_api_container_image_registry_prefix }}vabene1111/recipes:{{ tandoor_api_container_image_tag }}"
-tandoor_api_container_image_tag: "{{ tandoor_api_version }}"
-tandoor_api_container_image_force_pull: "{{ tandoor_api_container_image.endswith(':latest') }}"
-tandoor_api_container_image_registry_prefix: docker.io/
+tandoor_container_image: "{{ tandoor_container_image_registry_prefix }}vabene1111/recipes:{{ tandoor_container_image_tag }}"
+tandoor_container_image_tag: "{{ tandoor_version }}"
+tandoor_container_image_force_pull: "{{ tandoor_container_image.endswith(':latest') }}"
+tandoor_container_image_registry_prefix: docker.io/
 # A list of extra arguments to pass to the api container
-tandoor_api_container_extra_arguments: []
+tandoor_container_extra_arguments: []
 
-# tandoor frontend
-tandoor_frontend_container_image: "{{ tandoor_frontend_container_image_registry_prefix }}nginx:{{ tandoor_frontend_container_image_tag }}"
-tandoor_frontend_container_image_tag: "{{ tandoor_frontend_version }}"
-tandoor_frontend_container_image_force_pull: "{{ tandoor_frontend_container_image.endswith(':latest') or tandoor_frontend_container_image.endswith('mainline-alpine') }}"
-tandoor_frontend_container_image_registry_prefix: docker.io/
-# A list of extra arguments to pass to the frontend container
-tandoor_frontend_container_extra_arguments: []
 
-tandoor_api_container_http_host_bind_port: ''
-tandoor_frontend_container_http_host_bind_port: ''
+tandoor_container_http_host_bind_port: ''
 
-# tandoor_frontend_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
+# tandoor_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
 # See `../templates/labels.j2` for details.
 #
-# To inject your own other container labels, see `tandoor_api_container/frontend_labels_additional_labels`.
-tandoor_frontend_container_labels_traefik_enabled: true
-tandoor_frontend_container_labels_traefik_docker_network: ''
-tandoor_frontend_container_labels_traefik_hostname: "{{ tandoor_hostname }}"
+# To inject your own other container labels, see `tandoor_container/frontend_labels_additional_labels`.
+tandoor_container_labels_traefik_enabled: true
+tandoor_container_labels_traefik_docker_network: ''
+tandoor_container_labels_traefik_hostname: "{{ tandoor_hostname }}"
 # The path prefix must either be `/` or not end with a slash (e.g. `/tandoor`).
-tandoor_frontend_container_labels_traefik_path_prefix: "{{ tandoor_path_prefix }}"
+tandoor_container_labels_traefik_path_prefix: "{{ tandoor_path_prefix }}"
 # Controls whether `/.well-known/{carddav,caldav}` will be redirected to `/remote.php/dav/`
-tandoor_frontend_container_labels_traefik_rule: "Host(`{{ tandoor_frontend_container_labels_traefik_hostname }}`){% if tandoor_frontend_container_labels_traefik_path_prefix != '/' %} && PathPrefix(`{{ tandoor_frontend_container_labels_traefik_path_prefix | quote }}`){% endif %}"
-tandoor_frontend_container_labels_traefik_priority: 0
-tandoor_frontend_container_labels_traefik_entrypoints: web-secure
-tandoor_frontend_container_labels_traefik_tls: "{{ tandoor_frontend_container_labels_traefik_entrypoints != 'web' }}"
-tandoor_frontend_container_labels_traefik_tls_certResolver: default  # noqa var-naming
+tandoor_container_labels_traefik_rule: "Host(`{{ tandoor_container_labels_traefik_hostname }}`){% if tandoor_container_labels_traefik_path_prefix != '/' %} && PathPrefix(`{{ tandoor_container_labels_traefik_path_prefix | quote }}`){% endif %}"
+tandoor_container_labels_traefik_priority: 0
+tandoor_container_labels_traefik_entrypoints: web-secure
+tandoor_container_labels_traefik_tls: "{{ tandoor_container_labels_traefik_entrypoints != 'web' }}"
+tandoor_container_labels_traefik_tls_certResolver: default  # noqa var-naming
 
 # Controls which additional headers to attach to all HTTP requests.
-# To add your own custom request headers, use `tandoor_frontend_container_labels_traefik_additional_response_headers_custom`
-tandoor_frontend_container_labels_traefik_additional_request_headers: "{{ tandoor_frontend_container_labels_traefik_additional_request_headers_auto | combine(tandoor_frontend_container_labels_traefik_additional_request_headers_custom) }}"
-tandoor_frontend_container_labels_traefik_additional_request_headers_auto: {}
-tandoor_frontend_container_labels_traefik_additional_request_headers_custom: {}
+# To add your own custom request headers, use `tandoor_container_labels_traefik_additional_response_headers_custom`
+tandoor_container_labels_traefik_additional_request_headers: "{{ tandoor_container_labels_traefik_additional_request_headers_auto | combine(tandoor_container_labels_traefik_additional_request_headers_custom) }}"
+tandoor_container_labels_traefik_additional_request_headers_auto: {}
+tandoor_container_labels_traefik_additional_request_headers_custom: {}
 
 # Controls which additional headers to attach to all HTTP responses.
-# To add your own custom response headers, use `tandoor_frontend_container_labels_traefik_additional_response_headers_custom`
-tandoor_frontend_container_labels_traefik_additional_response_headers: "{{ tandoor_frontend_container_labels_traefik_additional_response_headers_auto | combine(tandoor_frontend_container_labels_traefik_additional_response_headers_custom) }}"
-tandoor_frontend_container_labels_traefik_additional_response_headers_auto: |
+# To add your own custom response headers, use `tandoor_container_labels_traefik_additional_response_headers_custom`
+tandoor_container_labels_traefik_additional_response_headers: "{{ tandoor_container_labels_traefik_additional_response_headers_auto | combine(tandoor_container_labels_traefik_additional_response_headers_custom) }}"
+tandoor_container_labels_traefik_additional_response_headers_auto: |
   {{
     {}
     | combine ({'X-XSS-Protection': tandoor_http_header_xss_protection} if tandoor_http_header_xss_protection else {})
@@ -90,27 +80,20 @@ tandoor_frontend_container_labels_traefik_additional_response_headers_auto: |
     | combine ({'X-Content-Type-Options': tandoor_http_header_content_type_options} if tandoor_http_header_content_type_options else {})
     | combine ({'Content-Security-Policy': tandoor_http_header_content_security_policy} if tandoor_http_header_content_security_policy else {})
     | combine ({'Permission-Policy': tandoor_http_header_content_permission_policy} if tandoor_http_header_content_permission_policy else {})
-    | combine ({'Strict-Transport-Security': tandoor_http_header_strict_transport_security} if tandoor_http_header_strict_transport_security and tandoor_frontend_container_labels_traefik_tls else {})
+    | combine ({'Strict-Transport-Security': tandoor_http_header_strict_transport_security} if tandoor_http_header_strict_transport_security and tandoor_container_labels_traefik_tls else {})
   }}
-tandoor_frontend_container_labels_traefik_additional_response_headers_custom: {}
+tandoor_container_labels_traefik_additional_response_headers_custom: {}
 
 # A list of middlewares to add to the service.
-# Add your own via the `tandoor_frontend_container_labels_traefik_http_middlewares_custom` variable.
-tandoor_frontend_container_labels_traefik_http_middlewares: "{{ tandoor_frontend_container_labels_traefik_http_middlewares_default + tandoor_frontend_container_labels_traefik_http_middlewares_auto + tandoor_frontend_container_labels_traefik_http_middlewares_custom }}"
+# Add your own via the `tandoor_container_labels_traefik_http_middlewares_custom` variable.
+tandoor_container_labels_traefik_http_middlewares: "{{ tandoor_container_labels_traefik_http_middlewares_default + tandoor_container_labels_traefik_http_middlewares_auto + tandoor_container_labels_traefik_http_middlewares_custom }}"
 
-tandoor_frontend_container_labels_traefik_http_middlewares_default: {}
-tandoor_frontend_container_labels_traefik_http_middlewares_auto: []
-tandoor_frontend_container_labels_traefik_http_middlewares_custom: []
+tandoor_container_labels_traefik_http_middlewares_default: {}
+tandoor_container_labels_traefik_http_middlewares_auto: []
+tandoor_container_labels_traefik_http_middlewares_custom: []
 
-# tandoor_api_container/frontend_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
-# See `../templates/labels.j2` for details.
-#
-# Example:
-# tandoor_api_container/frontend_labels_additional_labels: |
-#   my.label=1
-#   another.label="here"
-tandoor_api_container_labels_additional_labels: ''
-tandoor_frontend_container_labels_additional_labels: ''
+
+tandoor_container_labels_additional_labels: ''
 # tandoor_container_additional_environment_variables contains a multiline string with additional environment variables to pass to the container.
 #
 # Example:
@@ -129,13 +112,10 @@ tandoor_container_network: "{{ tandoor_identifier }}"
 
 # A list of additional container networks that the container would be connected to.
 # The playbook does not create these networks, so make sure they already exist.
-tandoor_api_container_additional_networks: "{{ tandoor_api_container_additional_networks_auto + tandoor_api_container_additional_networks_custom }}"
-tandoor_api_container_additional_networks_auto: []
-tandoor_api_container_additional_networks_custom: []
 
-tandoor_frontend_container_additional_networks: "{{ tandoor_frontend_container_additional_networks_auto + tandoor_frontend_container_additional_networks_custom }}"
-tandoor_frontend_container_additional_networks_auto: []
-tandoor_frontend_container_additional_networks_custom: []
+tandoor_container_additional_networks: "{{ tandoor_container_additional_networks_auto + tandoor_container_additional_networks_custom }}"
+tandoor_container_additional_networks_auto: []
+tandoor_container_additional_networks_custom: []
 
 tandoor_database_type: postgres
 tandoor_database_hostname: ''

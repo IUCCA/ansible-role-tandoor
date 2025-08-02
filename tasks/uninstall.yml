@@ -16,6 +16,7 @@
       with_items:
         - "{{ tandoor_identifier_api }}.service"
         - "{{ tandoor_identifier_frontend }}.service"
+        - "{{ tandoor_identifier }}.service"
 
     - name: Ensure tandoor systemd service does not exist
       ansible.builtin.file:
@@ -24,6 +25,7 @@
       with_items:
         - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier_api }}.service"
         - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier_frontend }}.service"
+        - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier }}.service"
 
     - name: Ensure tandoor path doesn't exist
       ansible.builtin.file:
