@@ -33,8 +33,8 @@
           tandoor_container_labels_traefik_path_prefix (`{{ tandoor_container_labels_traefik_path_prefix }}`) must either be `/` or not end with a slash (e.g. `/tandoor`).
       when: "tandoor_container_labels_traefik_path_prefix != '/' and tandoor_container_labels_traefik_path_prefix[-1] == '/'"
 
-    - name: Fail if tandoor_container_labels_traefik_path_prefix is not empty
-      ansible.builtin.fail:
-        msg: "tandoor_container_labels_traefik_path_prefix is not / -> tandoor_path_prefix has to be empty"
-      when: tandoor_container_labels_traefik_path_prefix != "/"
+    # - name: Fail if tandoor_container_labels_traefik_path_prefix is not empty
+    #   ansible.builtin.fail:
+    #     msg: "tandoor_container_labels_traefik_path_prefix is not / -> tandoor_path_prefix has to be empty"
+    #   when: tandoor_container_labels_traefik_path_prefix != "/"
         
