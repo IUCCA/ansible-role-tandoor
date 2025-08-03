@@ -30,7 +30,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
                 --mount type=bind,src={{ tandoor_staticfiles_path }},dst=/opt/recipes/staticfiles \
                 --mount type=bind,src={{ tandoor_mediafiles_path }},dst=/opt/recipes/mediafiles  \
                 {% if tandoor_path_prefix and tandoor_path_prefix != '/' %}
-                --mount type=bind,src={{ tandoor_nginx_path }}/nginx_recipes.conf,dst=/opt/recipes/Recipes.conf  \
+                --mount type=bind,src={{ tandoor_nginx_path }}/nginx_recipes.conf,dst=/opt/recipes/http.d/Recipes.conf  \
                 {% endif %}
                 --env-file={{ tandoor_base_path }}/env \
                 {% if tandoor_container_extra_arguments | length > 0 %}
