@@ -35,6 +35,6 @@
 
     - name: Fail if tandoor_container_labels_traefik_path_prefix is not empty
       ansible.builtin.fail:
-        msg: "tandoor_container_labels_traefik_path_prefix is not / -> tandoor_path_prefix has to be empty"
-      when: tandoor_container_labels_traefik_path_prefix != "/"
+        msg: Don’t set the tandoor_path_prefix variable and don’t override tandoor_container_labels_traefik_path_prefix"
+      when: tandoor_container_labels_traefik_path_prefix != "/" and tandoor_path_prefix!= "/"
         
