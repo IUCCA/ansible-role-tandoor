@@ -110,7 +110,7 @@
   with_items:
     - {src: "{{ role_path }}/templates/systemd/tandoor.service.j2", dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier }}.service"}
 
-- name: Prüfe, ob systemd service files existieren
+- name: Check whether systemd service files exist
   ansible.builtin.stat:
     path: "{{ devture_systemd_docker_base_systemd_path }}/{{ item }}.service"
   loop:
@@ -118,7 +118,7 @@
     - "{{ tandoor_frontend_identifier }}"
   register: service_files
 
-- name: Stoppe nur Dienste mit existierenden service files
+- name: Only stop services with existing service files
   ansible.builtin.service:
     name: "{{ item.item }}.service"
     state: stopped
