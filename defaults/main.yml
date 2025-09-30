@@ -16,7 +16,7 @@ tandoor_hostname: ''
 
 tandoor_path_prefix: /
 
-tandoor_version: 2.0.2
+tandoor_version: 2.2.7
 
 tandoor_uid: ''
 tandoor_gid: ''
