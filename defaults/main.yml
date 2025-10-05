@@ -16,7 +16,7 @@ tandoor_hostname: ''
 
 tandoor_path_prefix: /
 
-tandoor_version: 2.2.7
+tandoor_version: 2.3.0
 
 tandoor_uid: ''
 tandoor_gid: ''
@@ -142,7 +142,6 @@ tandoor_environment_variable_debug: 0
 # For that to work it downloads a chromium binary of about 140 MB to your server and then renders the PDF files using that.
 # Since that is something some server administrators might not want there the PDF exporter is disabled by default
 tandoor_environment_variable_enable_pdf_export: 0
-tandoor_environment_variable_tandoor_port: 8080
 # Specifies the value of the `X-XSS-Protection` header
 # Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
 #
