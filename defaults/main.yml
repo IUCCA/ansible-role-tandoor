@@ -16,10 +16,10 @@ tandoor_hostname: ''
 
 tandoor_path_prefix: /
 
-tandoor_version: 2.5.1
+tandoor_version: 2.6.1
 
-tandoor_uid: ''
-tandoor_gid: ''
+tandoor_uid: "{{ my_uid }}"
+tandoor_gid: "{{ my_gid }}"
 
 tandoor_systemd_required_services_list: "{{ tandoor_systemd_required_services_list_default + tandoor_systemd_required_services_list_auto + tandoor_systemd_required_services_list_custom }}"
 tandoor_systemd_required_services_list_default: ['docker.service']
@@ -34,7 +34,6 @@ tandoor_systemd_wanted_services_list_custom: []
 tandoor_base_path: "/{{ tandoor_base_path }}/tandoor"
 tandoor_data_path: "{{tandoor_base_path}}/data"
 tandoor_staticfiles_path: "{{ tandoor_data_path }}/staticfiles"
-tandoor_nginx_path: "{{ tandoor_data_path }}/nginx"
 tandoor_mediafiles_path: "{{ tandoor_data_path }}/mediafiles"
 
 tandoor_container_image: "{{ tandoor_container_image_registry_prefix }}vabene1111/recipes:{{ tandoor_container_image_tag }}"
