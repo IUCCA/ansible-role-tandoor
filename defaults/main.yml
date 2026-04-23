@@ -16,7 +16,7 @@ tandoor_hostname: ''
 
 tandoor_path_prefix: /
 
-tandoor_version: 2.6.8
+tandoor_version: 2.6.9
 
 tandoor_uid: "{{ my_uid }}"
 tandoor_gid: "{{ my_gid }}"
