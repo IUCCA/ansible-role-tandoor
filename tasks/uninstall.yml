@@ -15,7 +15,7 @@
         daemon_reload: true
       with_items:
         - "{{ tandoor_api_identifier }}.service"
-        - "{{ tandoor_frontend_identifier_frontend }}.service"
+        - "{{ tandoor_frontend_identifier }}.service"
         - "{{ tandoor_identifier }}.service"
 
     - name: Ensure tandoor systemd service does not exist
