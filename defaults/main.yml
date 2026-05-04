@@ -191,5 +191,3 @@ tandoor_floc_optout_enabled: true
 # - https://hstspreload.org/#opt-in
 # See: `tandoor_http_header_strict_transport_security`
 tandoor_hsts_preload_enabled: false
-
-
