@@ -3,7 +3,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0750
+    mode: "0750"
     owner: "{{ tandoor_uid }}"
     group: "{{ tandoor_gid }}"
   with_items:
@@ -14,10 +14,10 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0755
+    mode: "0755"
     owner: "{{ tandoor_uid }}"
     group: "{{ tandoor_gid }}"
-    recurse: yes
+    recurse: true
   with_items:
     - "{{ tandoor_staticfiles_path }}"
     - "{{ tandoor_mediafiles_path }}"
@@ -26,7 +26,7 @@
   ansible.builtin.template:
     src: "{{ role_path }}/templates/{{ item }}.j2"
     dest: "{{ tandoor_base_path }}/{{ item }}"
-    mode: 0640
+    mode: "0640"
     owner: "{{ tandoor_uid }}"
     group: "{{ tandoor_gid }}"
   with_items:
@@ -79,9 +79,10 @@
   ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    mode: 0644
+    mode: "0644"
   with_items:
-    - {src: "{{ role_path }}/templates/systemd/tandoor.service.j2", dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier }}.service"}
+    - src: "{{ role_path }}/templates/systemd/tandoor.service.j2"
+      dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier }}.service"
 
 - name: Check whether systemd service files exist
   ansible.builtin.stat:

@@ -1,8 +1,7 @@
 ---
-
 - name: Fail if required tandoor settings not defined
   ansible.builtin.fail:
-    msg: >
+    msg: >-
       You need to define a required configuration setting (`{{ item }}`).
   when: "lookup('vars', item, default='') | string | length == 0"
   with_items:
@@ -36,4 +35,3 @@
       ansible.builtin.fail:
         msg: Don’t set the tandoor_path_prefix variable and don’t override tandoor_container_labels_traefik_path_prefix"
       when: tandoor_container_labels_traefik_path_prefix != "/" and tandoor_path_prefix!= "/"
-        
