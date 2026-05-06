@@ -38,7 +38,6 @@ tandoor_mediafiles_path: "{{ tandoor_data_path }}/mediafiles"
 
 tandoor_container_image: "{{ tandoor_container_image_registry_prefix }}vabene1111/recipes:{{ tandoor_container_image_tag }}"
 tandoor_container_image_tag: "{{ tandoor_version }}"
-tandoor_container_image_force_pull: "{{ tandoor_container_image.endswith(':latest') }}"
 tandoor_container_image_registry_prefix: docker.io/
 # A list of extra arguments to pass to the api container
 tandoor_container_extra_arguments: []
