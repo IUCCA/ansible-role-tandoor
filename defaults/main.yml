@@ -21,6 +21,7 @@ tandoor_data_path: "{{ tandoor_base_path }}/data"
 tandoor_staticfiles_path: "{{ tandoor_data_path }}/staticfiles"
 tandoor_mediafiles_path: "{{ tandoor_data_path }}/mediafiles"
 
+# renovate: datasource=docker depName=vabene1111/recipes
 tandoor_version: 2.6.9
 
 tandoor_uid: ""
