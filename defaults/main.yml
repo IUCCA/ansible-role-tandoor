@@ -23,8 +23,8 @@ tandoor_mediafiles_path: "{{ tandoor_data_path }}/mediafiles"
 
 tandoor_version: 2.6.9
 
-tandoor_uid: "{{ my_uid }}"
-tandoor_gid: "{{ my_gid }}"
+tandoor_uid: ""
+tandoor_gid: ""
 
 # The scheme used for serving Tandoor.
 tandoor_scheme: https
