@@ -1,24 +1,28 @@
+# SPDX-FileCopyrightText: 2023 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2024 IUCCA
+# SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
-- block:
-    - when: tandoor_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
-
-    - when: tandoor_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
+- name: Perform Tandoor installation tasks
+  when: tandoor_enabled | bool
   tags:
     - setup-all
     - setup-tandoor
     - install-all
     - install-tandoor
+  block:
+    - name: Validate Tandoor configuration
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
+    - name: Install Tandoor
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
-- block:
-    - when: not tandoor_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
+- name: Perform Tandoor uninstallation tasks
+  when: not tandoor_enabled | bool
   tags:
     - setup-all
     - setup-tandoor
+  block:
+    - name: Uninstall Tandoor
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
