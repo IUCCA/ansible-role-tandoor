@@ -85,14 +85,6 @@ tandoor_container_labels_traefik_additional_response_headers_auto: |
   }}
 tandoor_container_labels_traefik_additional_response_headers_custom: {}
 
-# A list of middlewares to add to the service.
-# Add your own via the `tandoor_container_labels_traefik_http_middlewares_custom` variable.
-tandoor_container_labels_traefik_http_middlewares: "{{ tandoor_container_labels_traefik_http_middlewares_default + tandoor_container_labels_traefik_http_middlewares_auto + tandoor_container_labels_traefik_http_middlewares_custom }}"
-
-tandoor_container_labels_traefik_http_middlewares_default: {}
-tandoor_container_labels_traefik_http_middlewares_auto: []
-tandoor_container_labels_traefik_http_middlewares_custom: []
-
 tandoor_container_labels_additional_labels: ""
 
 # tandoor_container_additional_environment_variables contains a multiline string with additional environment variables to pass to the container.
