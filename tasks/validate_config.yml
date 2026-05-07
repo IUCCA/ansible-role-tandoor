@@ -14,20 +14,21 @@
     - { "old": "tandoor_http_header_content_permission_policy", "new": "tandoor_http_header_permissions_policy" }
     - { "old": "tandoor_container_image_force_pull", "new": "<removed> (the new community.docker.docker_image_pull module handles this natively)" }
 
-- name: Fail if required tandoor settings not defined
+- name: Fail if required Tandoor settings not defined
   ansible.builtin.fail:
     msg: >-
-      You need to define a required configuration setting (`{{ item }}`).
-  when: "lookup('vars', item, default='') | string | length == 0"
+      You need to define a required configuration setting (`{{ item.name }}`).
+  when: "item.when | bool and lookup('vars', item.name, default='') | string | length == 0"
   with_items:
-    - tandoor_identifier
-    - tandoor_uid
-    - tandoor_gid
-    - tandoor_hostname
-    - tandoor_path_prefix
-    - tandoor_container_network
+    - { "name": "tandoor_uid", when: true }
+    - { "name": "tandoor_gid", when: true }
+    - { "name": "tandoor_hostname", when: true }
+    - { "name": "tandoor_path_prefix", when: true }
+    - { "name": "tandoor_container_network", when: true }
+    - { "name": "tandoor_container_labels_traefik_middleware_basic_auth_users", when: "{{ tandoor_container_labels_traefik_middleware_basic_auth_enabled }}" }
 
-- when: tandoor_container_labels_traefik_enabled | bool
+- name: Run if Traefik is enabled
+  when: tandoor_container_labels_traefik_enabled | bool
   block:
     - name: Fail if required tandoor Traefik settings not defined
       ansible.builtin.fail:
@@ -36,6 +37,14 @@
       when: "lookup('vars', item, default='') | string | length == 0"
       with_items:
         - tandoor_container_labels_traefik_hostname
+        - tandoor_container_labels_traefik_path_prefix
+
+    - name: Fail if tandoor_container_labels_traefik_path_prefix is different than /
+      ansible.builtin.fail:
+        msg: >-
+          tandoor_container_labels_traefik_path_prefix (`{{ tandoor_container_labels_traefik_path_prefix }}`) must be `/`.
+          Tandoor does not support hosting under a subpath yet.
+      when: "tandoor_container_labels_traefik_path_prefix != '/'"
 
     # We ensure it doesn't end with a slash, because we handle both (slash and no-slash).
     # Knowing that `tandoor_container_labels_traefik_path_prefix` does not end with a slash
@@ -45,8 +54,3 @@
         msg: >-
           tandoor_container_labels_traefik_path_prefix (`{{ tandoor_container_labels_traefik_path_prefix }}`) must either be `/` or not end with a slash (e.g. `/tandoor`).
       when: "tandoor_container_labels_traefik_path_prefix != '/' and tandoor_container_labels_traefik_path_prefix[-1] == '/'"
-
-    - name: Fail if tandoor_container_labels_traefik_path_prefix is not empty
-      ansible.builtin.fail:
-        msg: Don’t set the tandoor_path_prefix variable and don’t override tandoor_container_labels_traefik_path_prefix"
-      when: tandoor_container_labels_traefik_path_prefix != "/" and tandoor_path_prefix!= "/"
