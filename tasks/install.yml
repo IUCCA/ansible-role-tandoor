@@ -87,30 +87,33 @@
     - src: "{{ role_path }}/templates/systemd/tandoor.service.j2"
       dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier }}.service"
 
-- name: Check whether systemd service files exist
+- name: Check existence of Tandoor version 1.x systemd services
   ansible.builtin.stat:
     path: "{{ devture_systemd_docker_base_systemd_path }}/{{ item }}.service"
   loop:
     - "{{ tandoor_api_identifier }}"
     - "{{ tandoor_frontend_identifier }}"
-  register: service_files
+  register: tandoor_v1_service_stat
 
-- name: Only stop services with existing service files
-  ansible.builtin.service:
-    name: "{{ item.item }}.service"
-    state: stopped
-    enabled: false
-    daemon_reload: true
-  loop: "{{ service_files.results }}"
-  when: item.stat.exists
+- name: Uninstall Tandoor veersion 1.x systemd services and files
+  when: tandoor_v1_service_stat.stat.exists | bool
+  block:
+    - name: Ensure Tandoor version 1.x systemd services are stopped
+      ansible.builtin.service:
+        name: "{{ item.item }}.service"
+        state: stopped
+        enabled: false
+        daemon_reload: true
+      loop: "{{ service_files.results }}"
+      when: item.stat.exists
 
-- name: Delete unnecessary files from old version
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
-    - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_api_identifier }}.service"
-    - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_frontend_identifier }}.service"
-    - "{{ tandoor_base_path }}/labels-api"
-    - "{{ tandoor_base_path }}/labels-frontend"
-    - "{{ tandoor_data_path }}/nginx"
+    - name: Ensure Tandoor version 1.x files do not exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_api_identifier }}.service"
+        - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_frontend_identifier }}.service"
+        - "{{ tandoor_base_path }}/labels-api"
+        - "{{ tandoor_base_path }}/labels-frontend"
+        - "{{ tandoor_data_path }}/nginx"
