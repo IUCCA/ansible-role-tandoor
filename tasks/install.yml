@@ -1,4 +1,6 @@
 # SPDX-FileCopyrightText: 2024 IUCCA
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -36,6 +38,7 @@
   with_items:
     - env
     - labels
+  register: tandoor_support_files_result
 
 - name: Ensure Tandoor container image is pulled via community.docker.docker_image_pull
   when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
@@ -80,12 +83,10 @@
 
 - name: Ensure Tandoor systemd service is present
   ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+    src: "{{ role_path }}/templates/systemd/tandoor.service.j2"
+    dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier }}.service"
     mode: "0644"
-  with_items:
-    - src: "{{ role_path }}/templates/systemd/tandoor.service.j2"
-      dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier }}.service"
+  register: tandoor_systemd_service_result
 
 - name: Check existence of Tandoor version 1.x systemd services
   ansible.builtin.stat:
@@ -117,3 +118,13 @@
         - "{{ tandoor_base_path }}/labels-api"
         - "{{ tandoor_base_path }}/labels-frontend"
         - "{{ tandoor_data_path }}/nginx"
+
+- name: Determine whether Tandoor needs a restart
+  ansible.builtin.set_fact:
+    tandoor_restart_necessary: >-
+      {{
+        tandoor_support_files_result.changed | default(false)
+        or tandoor_systemd_service_result.changed | default(false)
+        or tandoor_container_image_pull_result_ansible_module.changed | default(false)
+        or tandoor_container_image_pull_result_command.changed | default(false)
+      }}
