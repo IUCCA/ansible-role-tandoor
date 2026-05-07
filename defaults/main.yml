@@ -50,6 +50,9 @@ tandoor_container_network: "{{ tandoor_identifier }}"
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
 tandoor_container_http_host_bind_port: ""
 
+# The port number in the container
+tandoor_container_http_port: 80
+
 # A list of additional container networks that the container would be connected to.
 # The role does not create these networks, so make sure they already exist.
 # Use this to expose this container to another reverse proxy, which runs in a different container network.

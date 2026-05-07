@@ -41,7 +41,7 @@ traefik.http.routers.{{ tandoor_identifier }}.tls={{ tandoor_container_labels_tr
 traefik.http.routers.{{ tandoor_identifier }}.tls.certResolver={{ tandoor_container_labels_traefik_tls_certResolver }}
 {% endif %}
 
-traefik.http.services.{{ tandoor_identifier }}.loadbalancer.server.port=80
+traefik.http.services.{{ tandoor_identifier }}.loadbalancer.server.port={{ tandoor_container_http_port }}
 {% endif %}
 
 {{ tandoor_container_labels_additional_labels }}
