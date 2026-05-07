@@ -16,7 +16,7 @@ tandoor_frontend_identifier: "{{ tandoor_identifier }}-frontend"
 tandoor_scheme: https
 
 # The fully-qualified name of your tandoor server (e.g. `tandoor.example.com`)
-tandoor_hostname: ''
+tandoor_hostname: ""
 
 tandoor_path_prefix: /
 
@@ -26,7 +26,7 @@ tandoor_uid: "{{ my_uid }}"
 tandoor_gid: "{{ my_gid }}"
 
 tandoor_systemd_required_services_list: "{{ tandoor_systemd_required_services_list_default + tandoor_systemd_required_services_list_auto + tandoor_systemd_required_services_list_custom }}"
-tandoor_systemd_required_services_list_default: ['docker.service']
+tandoor_systemd_required_services_list_default: ["docker.service"]
 tandoor_systemd_required_services_list_auto: []
 tandoor_systemd_required_services_list_custom: []
 
@@ -36,7 +36,7 @@ tandoor_systemd_wanted_services_list_auto: []
 tandoor_systemd_wanted_services_list_custom: []
 
 tandoor_base_path: "/{{ tandoor_base_path }}/tandoor"
-tandoor_data_path: "{{tandoor_base_path}}/data"
+tandoor_data_path: "{{ tandoor_base_path }}/data"
 tandoor_staticfiles_path: "{{ tandoor_data_path }}/staticfiles"
 tandoor_mediafiles_path: "{{ tandoor_data_path }}/mediafiles"
 
@@ -46,15 +46,14 @@ tandoor_container_image_registry_prefix: docker.io/
 # A list of extra arguments to pass to the api container
 tandoor_container_extra_arguments: []
 
-
-tandoor_container_http_host_bind_port: ''
+tandoor_container_http_host_bind_port: ""
 
 # tandoor_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
 # See `../templates/labels.j2` for details.
 #
 # To inject your own other container labels, see `tandoor_container/frontend_labels_additional_labels`.
 tandoor_container_labels_traefik_enabled: true
-tandoor_container_labels_traefik_docker_network: ''
+tandoor_container_labels_traefik_docker_network: ""
 tandoor_container_labels_traefik_hostname: "{{ tandoor_hostname }}"
 # The path prefix must either be `/` or not end with a slash (e.g. `/tandoor`).
 tandoor_container_labels_traefik_path_prefix: "{{ tandoor_path_prefix }}"
@@ -63,7 +62,7 @@ tandoor_container_labels_traefik_rule: "Host(`{{ tandoor_container_labels_traefi
 tandoor_container_labels_traefik_priority: 0
 tandoor_container_labels_traefik_entrypoints: web-secure
 tandoor_container_labels_traefik_tls: "{{ tandoor_container_labels_traefik_entrypoints != 'web' }}"
-tandoor_container_labels_traefik_tls_certResolver: default  # noqa var-naming
+tandoor_container_labels_traefik_tls_certResolver: default # noqa var-naming
 
 # Controls which additional headers to attach to all HTTP requests.
 # To add your own custom request headers, use `tandoor_container_labels_traefik_additional_response_headers_custom`
@@ -94,15 +93,15 @@ tandoor_container_labels_traefik_http_middlewares_default: {}
 tandoor_container_labels_traefik_http_middlewares_auto: []
 tandoor_container_labels_traefik_http_middlewares_custom: []
 
+tandoor_container_labels_additional_labels: ""
 
-tandoor_container_labels_additional_labels: ''
 # tandoor_container_additional_environment_variables contains a multiline string with additional environment variables to pass to the container.
 #
 # Example:
 # tandoor_container_additional_environment_variables: |
 #   VAR=1
 #   ANOTHER=value
-tandoor_container_additional_environment_variables: ''
+tandoor_container_additional_environment_variables: ""
 
 # A list of additional "mounts" to be mounted in the container.
 # Contains definition objects like this:
@@ -120,24 +119,24 @@ tandoor_container_additional_networks_auto: []
 tandoor_container_additional_networks_custom: []
 
 tandoor_database_type: postgres
-tandoor_database_hostname: ''
+tandoor_database_hostname: ""
 tandoor_database_port: 5432
 tandoor_database_name: tandoor
-tandoor_database_username: ''
-tandoor_database_password: ''
+tandoor_database_username: ""
+tandoor_database_password: ""
 
 # A list of mail configuration parameters for tandoor.
-tandoor_email_host: ''
-tandoor_email_port: ''
-tandoor_host_user: ''
-tandoor_host_password: ''
-tandoor_use_tls: '0'
-tandoor_use_ssl: '0'
-tandoor_default_from_email: '' # email sender address (default 'webmaster@localhost')
-tondor_account_email_subject_prefix: '' # prefix used for account related emails (default "[Tandoor Recipes] ")
+tandoor_email_host: ""
+tandoor_email_port: ""
+tandoor_host_user: ""
+tandoor_host_password: ""
+tandoor_use_tls: "0"
+tandoor_use_ssl: "0"
+tandoor_default_from_email: "" # email sender address (default 'webmaster@localhost')
+tondor_account_email_subject_prefix: "" # prefix used for account related emails (default "[Tandoor Recipes] ")
 
 # Controls the tandoor environment secret variable
-tandoor_environment_variable_secret: ''
+tandoor_environment_variable_secret: ""
 # Controls the tandoor environment debug variable
 tandoor_environment_variable_debug: 0
 # The PDF Exporter is an experimental feature that uses the puppeteer browser renderer to render each recipe and export it to PDF.
