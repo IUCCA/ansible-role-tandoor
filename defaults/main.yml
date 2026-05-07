@@ -38,7 +38,9 @@ tandoor_path_prefix: /
 
 tandoor_container_image: "{{ tandoor_container_image_registry_prefix }}vabene1111/recipes:{{ tandoor_container_image_tag }}"
 tandoor_container_image_tag: "{{ tandoor_version }}"
-tandoor_container_image_registry_prefix: docker.io/
+tandoor_container_image_registry_prefix: "{{ tandoor_container_image_registry_prefix_upstream }}"
+tandoor_container_image_registry_prefix_upstream: "{{ tandoor_container_image_registry_prefix_upstream_default }}"
+tandoor_container_image_registry_prefix_upstream_default: docker.io/
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 tandoor_container_network: "{{ tandoor_identifier }}"
