@@ -168,7 +168,7 @@ tandoor_hsts_preload_enabled: false
 
 # List of systemd services that the Tandoor systemd service depends on
 tandoor_systemd_required_services_list: "{{ tandoor_systemd_required_services_list_default + tandoor_systemd_required_services_list_auto + tandoor_systemd_required_services_list_custom }}"
-tandoor_systemd_required_services_list_default: ["docker.service"]
+tandoor_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
 tandoor_systemd_required_services_list_auto: []
 tandoor_systemd_required_services_list_custom: []
 
