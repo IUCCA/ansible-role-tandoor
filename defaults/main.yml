@@ -97,7 +97,7 @@ tandoor_container_labels_traefik_additional_response_headers_auto: |
     | combine ({'X-XSS-Protection': tandoor_http_header_xss_protection} if tandoor_http_header_xss_protection else {})
     | combine ({'X-Content-Type-Options': tandoor_http_header_content_type_options} if tandoor_http_header_content_type_options else {})
     | combine ({'Content-Security-Policy': tandoor_http_header_content_security_policy} if tandoor_http_header_content_security_policy else {})
-    | combine ({'Permission-Policy': tandoor_http_header_content_permission_policy} if tandoor_http_header_content_permission_policy else {})
+    | combine ({'Permissions-Policy': tandoor_http_header_permissions_policy} if tandoor_http_header_permissions_policy else {})
     | combine ({'Strict-Transport-Security': tandoor_http_header_strict_transport_security} if tandoor_http_header_strict_transport_security and tandoor_container_labels_traefik_tls else {})
   }}
 tandoor_container_labels_traefik_additional_response_headers_custom: {}
@@ -131,9 +131,9 @@ tandoor_http_header_content_type_options: nosniff
 # See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
 tandoor_http_header_content_security_policy: frame-ancestors 'self'
 
-# Specifies the value of the `Permission-Policy` header.
-# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permission-Policy
-tandoor_http_header_content_permission_policy: "{{ 'interest-cohort=()' if tandoor_floc_optout_enabled else '' }}"
+# Specifies the value of the `Permissions-Policy` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
+tandoor_http_header_permissions_policy: "{{ 'interest-cohort=()' if tandoor_floc_optout_enabled else '' }}"
 
 # Specifies the value of the `Strict-Transport-Security` header.
 # See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
