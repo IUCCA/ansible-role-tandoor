@@ -233,9 +233,9 @@ tandoor_use_ssl: "0"
 tandoor_default_from_email: "" # email sender address (default 'webmaster@localhost')
 tondor_account_email_subject_prefix: "" # prefix used for account related emails (default "[Tandoor Recipes] ")
 
-# Controls the tandoor environment secret variable
+# Controls the Tandoor environment secret variable
 tandoor_environment_variable_secret: ""
-# Controls the tandoor environment debug variable
+# Controls the Tandoor environment debug variable
 tandoor_environment_variable_debug: 0
 # The PDF Exporter is an experimental feature that uses the puppeteer browser renderer to render each recipe and export it to PDF.
 # For that to work it downloads a chromium binary of about 140 MB to your server and then renders the PDF files using that.
