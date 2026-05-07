@@ -233,6 +233,9 @@ tandoor_use_ssl: "0"
 tandoor_default_from_email: "" # email sender address (default 'webmaster@localhost')
 tondor_account_email_subject_prefix: "" # prefix used for account related emails (default "[Tandoor Recipes] ")
 
+# Specify the timezone
+tandoor_environment_variables_tz: UTC
+
 # Controls the Tandoor environment secret variable
 tandoor_environment_variable_secret: ""
 # Controls the Tandoor environment debug variable
