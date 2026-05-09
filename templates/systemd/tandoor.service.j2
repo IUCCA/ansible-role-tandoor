@@ -1,40 +1,54 @@
+{#
+SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+SPDX-FileCopyrightText: 2024 IUCCA
+SPDX-FileCopyrightText: 2024 Nikita Chernyi
+SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+#}
+
 [Unit]
-Description=tandoor ({{ tandoor_identifier }})
+Description=Tandoor ({{ tandoor_identifier }})
 {% for service in tandoor_systemd_required_services_list %}
 Requires={{ service }}
 After={{ service }}
+{% endfor %}
+{% for service in tandoor_systemd_wanted_services_list %}
+Wants={{ service }}
 {% endfor %}
 DefaultDependencies=no
 
 [Service]
 Type=simple
 Environment="HOME={{ devture_systemd_docker_base_systemd_unit_home_path }}"
-ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} stop --time={{ devture_systemd_docker_base_container_stop_grace_time_seconds }} {{ tandoor_identifier }} 2>/dev/null || true'
-ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ tandoor_identifier }} 2>/dev/null || true'
+ExecStartPre={{ devture_systemd_docker_base_host_command_sh }} -c '{{ tandoor_container_cleanup_command | trim | replace("\n", " ") }}'
 
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
-                --rm \
-                --name={{ tandoor_identifier }} \
-                --log-driver=none \
-                --user={{ tandoor_uid }}:{{ tandoor_gid }} \
-                --cap-drop=ALL \
-                --cap-add=CHOWN \
-                --cap-add=DAC_OVERRIDE \
-                --cap-add=SETGID \
-                --cap-add=SETUID \
-                --cap-add=NET_BIND_SERVICE \
-                {% if tandoor_container_http_host_bind_port %}
-                -p {{ tandoor_container_http_host_bind_port }}:{{ tandoor_container_http_port }} \
-                {% endif %}
-                --label-file={{ tandoor_base_path }}/labels \
-                --network={{ tandoor_container_network }} \
-                --mount type=bind,src={{ tandoor_staticfiles_path }},dst=/opt/recipes/staticfiles \
-                --mount type=bind,src={{ tandoor_mediafiles_path }},dst=/opt/recipes/mediafiles  \
-                --env-file={{ tandoor_base_path }}/env \
-                {% if tandoor_container_extra_arguments | length > 0 %}
-                {{ tandoor_container_extra_arguments | join(' ') }} \
-                {% endif %}
-                {{ tandoor_container_image }}
+      --rm \
+      --name={{ tandoor_identifier }} \
+      --log-driver=none \
+      --user={{ tandoor_uid }}:{{ tandoor_gid }} \
+      --cap-drop=ALL \
+      --cap-add=CHOWN \
+      --cap-add=DAC_OVERRIDE \
+      --cap-add=SETGID \
+      --cap-add=SETUID \
+      --cap-add=NET_BIND_SERVICE \
+      --network={{ tandoor_container_network }} \
+      {% if tandoor_container_http_host_bind_port %}
+      -p {{ tandoor_container_http_host_bind_port }}:{{ tandoor_container_http_port }} \
+      {% endif %}
+      --env-file={{ tandoor_base_path }}/env \
+      --label-file={{ tandoor_base_path }}/labels \
+      --mount type=bind,src={{ tandoor_staticfiles_path }},dst=/opt/recipes/staticfiles \
+      --mount type=bind,src={{ tandoor_mediafiles_path }},dst=/opt/recipes/mediafiles  \
+      {% for volume in tandoor_container_additional_volumes %}
+      --mount type={{ volume.type | default('bind' if '/' in volume.src else 'volume') }},src={{ volume.src }},dst={{ volume.dst }}{{ (',' + volume.options) if volume.options | default('') else '' }} \
+      {% endfor %}
+      {% if tandoor_container_extra_arguments | length > 0 %}
+      {{ tandoor_container_extra_arguments | join(' ') }} \
+      {% endif %}
+      {{ tandoor_container_image }}
 
 {% for network in tandoor_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ tandoor_identifier }}
@@ -42,8 +56,9 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network conne
 
 ExecStart={{ devture_systemd_docker_base_host_command_docker }} start --attach {{ tandoor_identifier }}
 
-ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} stop --time={{ devture_systemd_docker_base_container_stop_grace_time_seconds }} {{ tandoor_identifier }} 2>/dev/null || true'
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} stop -t {{ devture_systemd_docker_base_container_stop_grace_time_seconds }} {{ tandoor_identifier }} 2>/dev/null || true'
 ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ tandoor_identifier }} 2>/dev/null || true'
+
 Restart=always
 RestartSec=30
 SyslogIdentifier={{ tandoor_identifier }}

@@ -1,13 +1,19 @@
----
+# SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2024 IUCCA
+# SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
-- name: Check existence of tandoor systemd service
+---
+- name: Check existence of Tandoor systemd service
   ansible.builtin.stat:
     path: "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier }}.service"
   register: tandoor_service_stat
 
-- when: tandoor_service_stat.stat.exists | bool
+- name: Uninstall Tandoor systemd services and files
+  when: tandoor_service_stat.stat.exists | bool
   block:
-    - name: Ensure tandoor systemd service is stopped
+    - name: Ensure Tandoor systemd services are stopped
       ansible.builtin.service:
         name: "{{ item }}"
         state: stopped
@@ -18,7 +24,7 @@
         - "{{ tandoor_frontend_identifier }}.service"
         - "{{ tandoor_identifier }}.service"
 
-    - name: Ensure tandoor systemd service does not exist
+    - name: Ensure Tandoor systemd services do not exist
       ansible.builtin.file:
         path: "{{ item }}"
         state: absent
@@ -27,7 +33,61 @@
         - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_frontend_identifier }}.service"
         - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier }}.service"
 
-    - name: Ensure tandoor path doesn't exist
+    - name: Ensure Tandoor support files do not exist
       ansible.builtin.file:
-        path: "{{ tandoor_base_path }}"
+        path: "{{ tandoor_base_path }}/{{ item }}"
         state: absent
+      with_items:
+        - env
+        - labels
+
+    - name: Ensure Tandoor local data path does not exist if empty
+      ansible.builtin.command:
+        cmd: "rmdir {{ tandoor_data_path }}"
+      register: tandoor_data_path_deletion_result
+      changed_when: tandoor_data_path_deletion_result.rc == 0
+      failed_when: false
+
+    - name: Ensure Tandoor base path does not exist if empty
+      ansible.builtin.command:
+        cmd: "rmdir {{ tandoor_base_path }}"
+      register: tandoor_base_path_deletion_result
+      changed_when: tandoor_base_path_deletion_result.rc == 0
+      failed_when: false
+
+    - name: Ensure Tandoor container network does not exist
+      when: tandoor_container_network_deletion_enabled
+      block:
+        - name: Ensure Tandoor container network does not exist via community.docker.docker_network
+          when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
+          community.docker.docker_network:
+            name: "{{ tandoor_container_network }}"
+            state: absent
+          register: tandoor_network_deletion_result
+
+        - name: Ensure Tandoor container network does not exist via ansible.builtin.command
+          when: devture_systemd_docker_base_container_network_creation_method == 'command'
+          ansible.builtin.command:
+            cmd: >-
+              {{ devture_systemd_docker_base_host_command_docker }} network rm
+              {{ tandoor_container_network }}
+          register: tandoor_network_deletion_result
+          changed_when: tandoor_container_network in tandoor_network_deletion_result.stdout
+
+- name: Check existence of Tandoor local data path
+  ansible.builtin.stat:
+    path: "{{ tandoor_data_path }}"
+  register: tandoor_data_path_stat
+
+# We just want to notify the user. Deleting data is too destructive.
+- name: Inject the message about the remaining Tandoor local data path
+  when: tandoor_data_path_stat.stat.exists | bool
+  ansible.builtin.set_fact:
+    devture_playbook_runtime_messages_list: |
+      {{
+        devture_playbook_runtime_messages_list | default([])
+        +
+        [
+          "Note: As the local Tandoor instance has been removed, some old data remains in `" + tandoor_data_path + "`. Feel free to delete it."
+        ]
+      }}

@@ -1,5 +1,11 @@
+# SPDX-FileCopyrightText: 2024 IUCCA
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 ---
-- name: Ensure tandoor paths exist
+- name: Ensure Tandoor paths exist
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -10,7 +16,7 @@
     - "{{ tandoor_base_path }}"
     - "{{ tandoor_data_path }}"
 
-- name: Ensure tandoor data subdir paths with 755 exist
+- name: Ensure Tandoor data subdir paths with 755 exist
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -22,7 +28,7 @@
     - "{{ tandoor_staticfiles_path }}"
     - "{{ tandoor_mediafiles_path }}"
 
-- name: Ensure tandoor support files installed
+- name: Ensure Tandoor support files installed
   ansible.builtin.template:
     src: "{{ role_path }}/templates/{{ item }}.j2"
     dest: "{{ tandoor_base_path }}/{{ item }}"
@@ -32,36 +38,38 @@
   with_items:
     - env
     - labels
+  register: tandoor_support_files_result
 
-- name: Ensure tandoor container image is pulled via community.docker.docker_image_pull
+- name: Ensure Tandoor container image is pulled via community.docker.docker_image_pull
   when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
   community.docker.docker_image_pull:
     name: "{{ tandoor_container_image }}"
     pull: always
-  register: image_pull_result
+  register: tandoor_container_image_pull_result_ansible_module
   retries: "{{ devture_playbook_help_container_retries_count }}"
   delay: "{{ devture_playbook_help_container_retries_delay }}"
-  until: image_pull_result is not failed
+  until: tandoor_container_image_pull_result_ansible_module is not failed
 
-- name: Ensure tandoor container image is pulled via command
+- name: Ensure Tandoor container image is pulled via ansible.builtin.command
   when: devture_systemd_docker_base_container_image_pull_method == 'command'
   ansible.builtin.command:
     cmd: "{{ devture_systemd_docker_base_host_command_docker }} pull {{ tandoor_container_image }}"
-  register: image_pull_result
+  register: tandoor_container_image_pull_result_command
   retries: "{{ devture_playbook_help_container_retries_count }}"
   delay: "{{ devture_playbook_help_container_retries_delay }}"
-  until: image_pull_result is not failed
-  changed_when: "'Downloaded newer image' in image_pull_result.stdout"
+  until: tandoor_container_image_pull_result_command is not failed
+  changed_when: "'Downloaded newer image' in tandoor_container_image_pull_result_command.stdout"
 
-- name: Ensure tandoor container network is created via community.docker.docker_network
+- name: Ensure Tandoor container network is created via community.docker.docker_network
   when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
-  community.general.docker_network:
+  community.docker.docker_network:
     enable_ipv6: "{{ devture_systemd_docker_base_ipv6_enabled }}"
     name: "{{ tandoor_container_network }}"
     driver: bridge
     driver_options: "{{ devture_systemd_docker_base_container_networks_driver_options }}"
+  register: tandoor_network_creation_result
 
-- name: Ensure tandoor container network is created via ansible.builtin.command
+- name: Ensure Tandoor container network is created via ansible.builtin.command
   when: devture_systemd_docker_base_container_network_creation_method == 'command'
   ansible.builtin.command:
     cmd: >-
@@ -69,43 +77,54 @@
       {% if devture_systemd_docker_base_ipv6_enabled %}--ipv6{% endif %}
       {{ devture_systemd_docker_base_container_networks_driver_options_string }}
       {{ tandoor_container_network }}
-  register: network_creation_result
-  changed_when: network_creation_result.rc == 0
-  failed_when: network_creation_result.rc != 0 and 'already exists' not in network_creation_result.stderr
+  register: tandoor_network_creation_result
+  changed_when: tandoor_network_creation_result.rc == 0
+  failed_when: tandoor_network_creation_result.rc != 0 and 'already exists' not in tandoor_network_creation_result.stderr
 
-- name: Ensure tandoor systemd service is present
+- name: Ensure Tandoor systemd service is present
   ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+    src: "{{ role_path }}/templates/systemd/tandoor.service.j2"
+    dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier }}.service"
     mode: "0644"
-  with_items:
-    - src: "{{ role_path }}/templates/systemd/tandoor.service.j2"
-      dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_identifier }}.service"
+  register: tandoor_systemd_service_result
 
-- name: Check whether systemd service files exist
+- name: Check existence of Tandoor version 1.x systemd services
   ansible.builtin.stat:
     path: "{{ devture_systemd_docker_base_systemd_path }}/{{ item }}.service"
   loop:
     - "{{ tandoor_api_identifier }}"
     - "{{ tandoor_frontend_identifier }}"
-  register: service_files
+  register: tandoor_v1_service_stat
 
-- name: Only stop services with existing service files
-  ansible.builtin.service:
-    name: "{{ item.item }}.service"
-    state: stopped
-    enabled: false
-    daemon_reload: true
-  loop: "{{ service_files.results }}"
-  when: item.stat.exists
+- name: Uninstall Tandoor veersion 1.x systemd services and files
+  when: tandoor_v1_service_stat.stat.exists | bool
+  block:
+    - name: Ensure Tandoor version 1.x systemd services are stopped
+      ansible.builtin.service:
+        name: "{{ item.item }}.service"
+        state: stopped
+        enabled: false
+        daemon_reload: true
+      loop: "{{ service_files.results }}"
+      when: item.stat.exists
 
-- name: Delete unnecessary files from old version
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
-    - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_api_identifier }}.service"
-    - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_frontend_identifier }}.service"
-    - "{{ tandoor_base_path }}/labels-api"
-    - "{{ tandoor_base_path }}/labels-frontend"
-    - "{{ tandoor_data_path }}/nginx"
+    - name: Ensure Tandoor version 1.x files do not exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_api_identifier }}.service"
+        - "{{ devture_systemd_docker_base_systemd_path }}/{{ tandoor_frontend_identifier }}.service"
+        - "{{ tandoor_base_path }}/labels-api"
+        - "{{ tandoor_base_path }}/labels-frontend"
+        - "{{ tandoor_data_path }}/nginx"
+
+- name: Determine whether Tandoor needs a restart
+  ansible.builtin.set_fact:
+    tandoor_restart_necessary: >-
+      {{
+        tandoor_support_files_result.changed | default(false)
+        or tandoor_systemd_service_result.changed | default(false)
+        or tandoor_container_image_pull_result_ansible_module.changed | default(false)
+        or tandoor_container_image_pull_result_command.changed | default(false)
+      }}
