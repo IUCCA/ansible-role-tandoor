@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 IUCCA
+# SPDX-FileCopyrightText: 2024-2026 IUCCA
 # SPDX-FileCopyrightText: 2026 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2026 Suguru Hirahara
 #
@@ -96,7 +96,7 @@
     - "{{ tandoor_frontend_identifier }}"
   register: tandoor_v1_service_stat
 
-- name: Uninstall Tandoor veersion 1.x systemd services and files
+- name: Uninstall Tandoor version 1.x systemd services and files
   when: tandoor_v1_service_stat.stat.exists | bool
   block:
     - name: Ensure Tandoor version 1.x systemd services are stopped
@@ -105,7 +105,7 @@
         state: stopped
         enabled: false
         daemon_reload: true
-      loop: "{{ service_files.results }}"
+      loop: "{{ tandoor_v1_service_stat.results }}"
       when: item.stat.exists
 
     - name: Ensure Tandoor version 1.x files do not exist
