@@ -97,7 +97,7 @@
   register: tandoor_v1_service_stat
 
 - name: Uninstall Tandoor version 1.x systemd services and files
-  when: tandoor_v1_service_stat.stat.exists | bool
+  when: tandoor_v1_service_stat.results | selectattr('stat.exists') | list | length > 0
   block:
     - name: Ensure Tandoor version 1.x systemd services are stopped
       ansible.builtin.service:
