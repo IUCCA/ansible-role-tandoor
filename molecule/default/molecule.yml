@@ -30,6 +30,7 @@ provisioner:
       all:
         # Helper variables
         tandoor_debug_service_enabled: false
+        tandoor_restarts_check_enabled: true
         # A name the role never puts into ALLOWED_HOSTS, used to check that
         # Tandoor turns away everything it was not configured for.
         tandoor_molecule_unexpected_hostname: unexpected.molecule.test
