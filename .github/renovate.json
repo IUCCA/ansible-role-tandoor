@@ -5,6 +5,6 @@
     "What Molecule does gate is that the pinned version runs: both scenarios assert that the version Tandoor serves over its OpenAPI schema is the `tandoor_version` that defaults/main.yml pins."
   ],
   "extends": [
-    "github>mother-of-all-self-hosting/renovate-config#v1.0.0"
+    "github>mother-of-all-self-hosting/renovate-config#v1.1.0"
   ]
 }
