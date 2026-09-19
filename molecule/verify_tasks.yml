@@ -7,38 +7,43 @@
 # points the role at. Whatever distinguishes one scenario from another lives in
 # that scenario's own verify.yml.
 
-# Only for values that describe the role rather than the scenario. Scenario-tuned
-# values (ports, hostname, database) come from the scenario's group_vars, which
-# this must not shadow - hence the separate namespace.
-- name: Read the role's own defaults
+# The role is not included in this playbook, so its defaults are not in
+# scope. Reading defaults/main.yml directly ties the version assertion
+# below.
+- name: Load the role defaults
   ansible.builtin.include_vars:
-    file: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
-    name: tandoor_role_defaults
+    file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+    name: tandoor_defaults
 
-- name: Wait for the Tandoor systemd service to report itself active
+- name: Wait for the Tandoor systemd services to become active (up to 180s each)
   ansible.builtin.systemd_service:
-    name: tandoor.service
-  register: tandoor_service
-  until: tandoor_service.status.ActiveState | default('') == 'active'
-  retries: 30
-  delay: 2
-  # So that a service which never comes up fails at the assert below, which says
-  # what was expected, rather than at this bare wait.
+    name: "{{ item }}"
+  register: tandoor_services
+  until: tandoor_services.status.ActiveState == 'active'
+  retries: 36
+  delay: 5
+  loop: "{{ tandoor_verify_units }}"
+  # So that giving up is reported by the assertion below rather than as a
+  # wall of systemd unit properties.
   failed_when: false
-  changed_when: false
 
-# The unit carries `Restart=always`, which means a container that dies seconds
-# into every boot still leaves the unit `active` indefinitely. The restart
-# counter is what makes "the service is up" mean anything here.
-- name: Assert that the Tandoor service is up and has not been restarting
+# `Restart=always` in the systemd unit means that even a container which crashes
+# and gets restarted reads as active here, so this is a precondition rather than
+# a result.
+- name: Assert the Tandoor systemd services are active
   ansible.builtin.assert:
-    that:
-      - tandoor_service.status.ActiveState | default('') == 'active'
-      - tandoor_service.status.NRestarts | int == 0
+    that: tandoor_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
     fail_msg: >-
-      tandoor.service is {{ tandoor_service.status.ActiveState | default('not reporting a state') }}
-      after {{ tandoor_service.status.NRestarts | default('an unknown number of') }} restart(s)
-    success_msg: "tandoor.service is active and has not restarted"
+      Not every service is active:
+      {{ dict(tandoor_verify_units | zip(tandoor_services.results | map(attribute='status.ActiveState'))) }}
+    success_msg: "Every systemd service is active"
+
+- name: Retrieve the Tandoor systemd services log for debugging
+  when: tandoor_debug_service_enabled | bool
+  ansible.builtin.command:
+    cmd: "journalctl --no-pager --output=cat --unit={{ item }}"
+  changed_when: false
+  loop: "{{ tandoor_verify_units }}"
 
 - name: Wait for Tandoor to answer at the hostname the role configured
   ansible.builtin.uri:
@@ -52,14 +57,14 @@
   failed_when: false
   changed_when: false
 
-- name: Retrieve the Tandoor service log
+- name: Retrieve the Tandoor systemd service log
   when: tandoor_root.status | default(0) != 302 or tandoor_debug_service_enabled | bool
   ansible.builtin.command:
-    cmd: journalctl --no-pager --lines=60 --unit=tandoor.service
+    cmd: journalctl --no-pager --output=cat --lines=60 --unit=tandoor.service
   register: tandoor_journal
   changed_when: false
 
-- name: Show the Tandoor service log
+- name: Show the Tandoor systemd service log
   when: tandoor_journal.stdout is defined
   ansible.builtin.debug:
     var: tandoor_journal.stdout_lines
@@ -111,7 +116,7 @@
 # Served by Django itself, out of `cookbook/version_info.py` of the code that is
 # actually running - not out of the image's labels or the tag it was pulled by.
 # This is what makes a version bump testable rather than merely deployable.
-- name: Ask Tandoor which version it is running
+- name: Query the version of the running Tandoor
   ansible.builtin.uri:
     url: "{{ tandoor_verify_url }}/openapi/?format=json"
     return_content: true
@@ -122,17 +127,11 @@
   ansible.builtin.set_fact:
     tandoor_reported_version: "{{ (tandoor_openapi.content | from_json).info.version }}"
 
-# Reported as `<schema version> (<Tandoor version>)`, e.g. `0.0.0 (2.6.13)`.
-- name: Assert that the running Tandoor is the version defaults/main.yml pins
+- name: Assert the running Tandoor is the version this role installs
   ansible.builtin.assert:
-    that: tandoor_reported_version.endswith('(' ~ tandoor_role_defaults.tandoor_version ~ ')')
-    fail_msg: >-
-      Tandoor reports version `{{ tandoor_reported_version }}`, which does not
-      carry the `{{ tandoor_role_defaults.tandoor_version }}` that
-      `tandoor_version` in defaults/main.yml pins
-    success_msg: >-
-      Tandoor reports `{{ tandoor_reported_version }}`, which carries the pinned
-      {{ tandoor_role_defaults.tandoor_version }}
+    that: tandoor_reported_version.endswith('(' ~ tandoor_defaults.tandoor_version ~ ')')
+    fail_msg: "Tandoor reports {{ tandoor_reported_version | default('none') }}, expected {{ tandoor_defaults.tandoor_version }}"
+    success_msg: "Tandoor reports {{ tandoor_reported_version }}"
 
 - name: Read the environment file the role rendered
   ansible.builtin.slurp:

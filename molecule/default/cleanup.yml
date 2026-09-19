@@ -51,7 +51,7 @@
 
     - name: Check whether the Tandoor container is still running
       ansible.builtin.command:
-        argv: [docker, ps, --quiet, --filter, "name=^{{ tandoor_identifier }}$"]
+        cmd: docker ps --quiet --filter name=^{{ tandoor_identifier }}$
       register: tandoor_uninstalled_container
       changed_when: false
 
