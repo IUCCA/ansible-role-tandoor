@@ -133,8 +133,8 @@
         - name: Show the Tandoor verification summary
           ansible.builtin.debug:
             msg:
-              - "Tandoor systemd: {% for unit, state in tandoor_verify_units | zip(tandoor_verify_units.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
-              - "Tandoor server restarts: {% for unit, restarts in tandoor_verify_units | zip(tandoor_restarts_after.results | map(attribute='status.NRestarts')) %}{{ restarts }} ({{ unit }}){% if not loop.last %}, {% endif %}{% endfor %}"
+              - "Tandoor systemd: {% for unit, state in tandoor_verify_units | zip(tandoor_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
+              - "Tandoor restarts: {% for unit, restarts in tandoor_verify_units | zip(tandoor_restarts_after.results | map(attribute='status.NRestarts')) %}{{ restarts }} ({{ unit }}){% if not loop.last %}, {% endif %}{% endfor %}"
               - "Tandoor version: {{ tandoor_reported_version }}"
               - "Tandoor SQLite ({{ tandoor_verify_sqlite_path }}): {{ tandoor_sqlite_migrations.stdout | trim }} migrations"
               - "Tandoor Traefik label lines: {{ tandoor_labels_lines | length }}"
