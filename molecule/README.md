@@ -59,7 +59,7 @@ Besides the checks shared by both scenarios, it queries the Postgres database as
 
 ### Shared checks
 
-[`resources/tasks/verify_tandoor.yml`](resources/tasks/verify_tandoor.yml) holds what both scenarios check:
+[`verify_tasks.yml`](verify_tasks.yml) holds what both scenarios check:
 
 - the systemd service is active *and* has not been restarting (the unit carries `Restart=always`, so "active" alone says nothing about a container that dies on every boot)
 - Tandoor answers `/` with a redirect to `/setup/`, which it can only decide after asking its database whether an account exists
