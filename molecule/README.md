@@ -62,7 +62,7 @@ Besides the checks shared by both scenarios, it queries the Postgres database as
 [`verify_tasks.yml`](verify_tasks.yml) holds what both scenarios check:
 
 - the systemd service is active *and* has not been restarting (the unit carries `Restart=always`, so "active" alone says nothing about a container that dies on every boot)
-- Tandoor answers `/` with a redirect to `/setup/`, which it can only decide after asking its database whether an account exists
+- Tandoor answers its login page with a redirect to `/setup/`, which it can only decide after asking its database whether an account exists
 - Tandoor answers a request for a hostname the role did not configure with a 400, which is what makes the check above evidence that the role's environment file reached Django
 - the version Tandoor reports over its OpenAPI schema is the one `tandoor_version` pins in `defaults/main.yml`
 
