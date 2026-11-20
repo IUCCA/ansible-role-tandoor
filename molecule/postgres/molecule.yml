@@ -65,8 +65,8 @@ provisioner:
         tandoor_database_type: postgres
         tandoor_database_hostname: "{{ postgres_connection_hostname }}"
         tandoor_database_port: "{{ postgres_connection_port }}"
-        tandoor_database_username: my_database_username
-        tandoor_database_password: my_database_password
+        tandoor_database_username: /#@my_database_username?%
+        tandoor_database_password: /#@my_database_password?%
         tandoor_database_name: tandoor
         tandoor_systemd_required_services_list_auto: |
           {{
@@ -89,21 +89,5 @@ provisioner:
   env:
     # Workaround for https://github.com/ansible/molecule/issues/4391
     ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/..:/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:~/.ansible/roles
-scenario:
-  # See: https://docs.ansible.com/projects/molecule/configuration/?h=test_sequence#scenario
-  test_sequence:
-    - dependency
-    - cleanup
-    - destroy
-    - syntax
-    - create
-    - prepare
-    - converge
-    # Disable idempotence test for now due to ansible-role-postgres
-    # - idempotence
-    - side_effect
-    - verify
-    - cleanup
-    - destroy
 verifier:
   name: ansible

@@ -73,21 +73,32 @@
 # gunicorn is not up that same request gets nginx's own 502, and while the
 # database is unreachable the container exits rather than serving anything.
 #
-# The redirect target is what makes this a check on the database rather than on
-# the web server: Tandoor sends a first-time visitor to `/setup/` only after
-# asking its database whether an account exists yet.
+# Since Tandoor 2.7, `/` itself only sends an anonymous visitor to the login page,
+# without asking the database anything. The login page is the one that sends a
+# first-time visitor on to `/setup/`, and only after asking its database whether
+# an account exists yet. That redirect is what makes this a check on the
+# database rather than on the web server.
+- name: Ask Tandoor for the login page an anonymous visitor is sent to
+  ansible.builtin.uri:
+    url: "{{ tandoor_verify_url }}/account/login/"
+    follow_redirects: none
+    status_code: [302]
+  register: tandoor_login
+  failed_when: false
+  changed_when: false
+
 - name: Assert that Tandoor sends a first-time visitor to its setup page
   ansible.builtin.assert:
     that:
-      - tandoor_root.status | default(0) == 302
+      - tandoor_login.status | default(0) == 302
       # `ansible.builtin.uri` reports the Location header absolutized against the
       # request URL, so the raw `/setup/` the response carries arrives here as a
       # full URL. Both forms are accepted, neither loosely.
-      - tandoor_root.location | default('') in ['/setup/', tandoor_verify_url ~ '/setup/']
+      - tandoor_login.location | default('') in ['/setup/', tandoor_verify_url ~ '/setup/']
     fail_msg: >-
-      GET {{ tandoor_verify_url }}/ answered
-      {{ tandoor_root.status | default('nothing') }}
-      {{ ('-> ' ~ tandoor_root.location) if tandoor_root.location is defined else '' }},
+      GET {{ tandoor_verify_url }}/account/login/ answered
+      {{ tandoor_login.status | default('nothing') }}
+      {{ ('-> ' ~ tandoor_login.location) if tandoor_login.location is defined else '' }},
       rather than a 302 to /setup/
     success_msg: "Tandoor redirects a first-time visitor to /setup/"
 
@@ -97,7 +108,7 @@
 # request would be answered the same way as the one above.
 - name: Ask Tandoor for the same page under a hostname the role did not configure
   ansible.builtin.uri:
-    url: "{{ tandoor_verify_unexpected_host_url }}/"
+    url: "{{ tandoor_verify_unexpected_host_url }}/account/login/"
     follow_redirects: none
     status_code: [400]
   register: tandoor_unexpected_host
@@ -108,7 +119,7 @@
   ansible.builtin.assert:
     that: tandoor_unexpected_host.status | default(0) == 400
     fail_msg: >-
-      GET {{ tandoor_verify_unexpected_host_url }}/ answered
+      GET {{ tandoor_verify_unexpected_host_url }}/account/login/ answered
       {{ tandoor_unexpected_host.status | default('nothing') }} rather than 400,
       so ALLOWED_HOSTS is not what the role's env file says it is
     success_msg: "Tandoor serves only the hostname the role put in ALLOWED_HOSTS"
