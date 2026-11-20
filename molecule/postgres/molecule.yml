@@ -65,8 +65,8 @@ provisioner:
         tandoor_database_type: postgres
         tandoor_database_hostname: "{{ postgres_connection_hostname }}"
         tandoor_database_port: "{{ postgres_connection_port }}"
-        tandoor_database_username: my_database_username
-        tandoor_database_password: my_database_password
+        tandoor_database_username: /#@my_database_username?%
+        tandoor_database_password: /#@my_database_password?%
         tandoor_database_name: tandoor
         tandoor_systemd_required_services_list_auto: |
           {{
