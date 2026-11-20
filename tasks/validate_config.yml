@@ -22,9 +22,6 @@
   with_items:
     - tandoor_uid
     - tandoor_gid
-    - tandoor_hostname
-    - tandoor_path_prefix
-    - tandoor_container_network
     - tandoor_environment_variable_secret
 
 - name: Fail if Tandoor database type invalid
